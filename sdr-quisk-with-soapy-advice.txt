@@ -1,0 +1,104 @@
+################################################################################
+quisk on linux advice: 
+################################################################################
+
+If you want to try quisk plus soapy on linux, I recommend:
+
+1) Make sure there is only one copy of soapy on the linux box
+   a) I found quisk favors any copy of soapy installed to /usr (i.e. one
+      from the OS) over any installed to /usr/local (i.e. one you build 
+      yourself
+   b) So if you build soapy from source, uninstall any existing binary
+      you get from the operating system repositories
+   c) For debian based OSes like ubunty and Raspi OS, this means doing 
+      'sudo apt remove' on all the soapy components you see via 
+      'sudo apt list | grep -i soapy'
+
+2) Don't do a pip install, download the source zip/tar file and unzip/untar it
+
+3) Do 'make quisk3' since python3 is best
+
+4) Do 'make soapy3" to get the soapy built
+
+5) You should now be able to add a new radio of type SoapySDR
+
+################################################################################
+Adding a locally attached rtlsdr radio to quisk using soapy:
+################################################################################
+
+a) hit 'Config' button
+
+b) add a radio of type SoapySDR called SoapyRadio1
+
+c) switch to the SoapyRadio1 tab, focus is in Hardware sub-tab
+
+d) hit the 'Change' button alongside the 'Device' line
+
+e) I see console messages:
+
+linux; GNU C++ version 7.3.0; Boost_106501; UHD_003.010.003.000-0-unknown
+
+Found Rafael Micro R820T tuner
+
+f) The resulting 'change device' popup is a drop down menu, pick the rtlsdr 
+device, it fills in "driver=rtlsdr, label=Generic RTL2832U OEM :: 00000001"
+
+g) It says 'Please check the settings for the new hardware device'
+
+h) I hit 'OK'
+
+i) I change:
+   RX sample: 1000 (think this means 1M samples/sec)
+   RX gain: 20.0   (middle of range)
+   RX gain mode: leave as 'total'
+   TX: leave as 'Disable'
+
+j) Help screen says:
+
+To restart Quisk, press the Restart button on the Radios tab. 
+
+but I can find no Restart button so I exit the app using the X on the
+top right of the app
+
+k) Restart yields:
+
+user@host:~/code/sdr/quisk-4.1.74$ python2 ./quisk.py 
+linux; GNU C++ version 7.3.0; Boost_106501; UHD_003.010.003.000-0-unknown
+
+Found Rafael Micro R820T tuner
+Found Rafael Micro R820T tuner
+Exact sample rate is: 1000000.026491 Hz
+[R82XX] PLL not locked!
+
+So it is applying my sample rate of 1M samples/sec...
+
+################################################################################
+Adding a remotely attached airspyhf radio to quisk using soapy:
+################################################################################
+
+Same steps as above, but first make sure you can access the remote radio
+using 'SoapySDRUtil --find'.  Some times I need to repeat this command
+five or more times till it sees the remote radio, especially if I have
+not acessed the radio in a while.  It has a discovery protocol and it 
+seems to "forget" about the radio if it isn't used for a while.
+
+Then, when adding a new radio in quisk, the 'change device' drop-down had 
+
+driver=remote, label=AirSpy HF+ [3652eb5dacde39f8]
+
+This worked OK for a few seconds, then the radio would stop and would
+not restart.  I found after debugging I had to force use of tcp rather
+than udp by changing the string to:
+
+driver=remote, remote:prot=tcp, label=AirSpy HF+ [3652eb5dacde39f8]
+
+You should be able to change this in the radio -> hardware tab, but if
+not you can carefully edit the quisk json file it creates in the home
+directory on linux (not sure where this file is on windows, maybe the
+quisk install page says?).
+
+In my case the $HOME/quisk_settings.json file contains the line:
+
+"soapy_device": "driver=remote, remote:prot=tcp, label=AirSpy HF+ [3652eb5dacde39f8]",
+
+and this works quite well...

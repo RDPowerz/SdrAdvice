@@ -1,0 +1,321 @@
+================================================================================
+PiSDR with Airspy HF+
+================================================================================
+
+Image: https://github.com/luigifcruz/pisdr-image
+
+--------------------------------------------------------------------------------
+Change default speaker to headphones jack:
+--------------------------------------------------------------------------------
+
+sudo raspi-config
+
+This will open the configuration screen:
+
+Select System Options (Currently option 1, but yours may be different) and
+press Enter.
+
+Now select the Option named, Audio (Currently option S2, but yours may be
+different) and press Enter:
+
+Select your required mode, press Enter and press the right arrow key to exit
+the options list, then select Finish to exit the configuration tool.
+
+After you have finished modifying your audio settings, you need to restart your
+Raspberry Pi in order for your changes to take effect.
+
+sudo shutdown -r now
+
+--------------------------------------------------------------------------------
+SoapySDRUtil stuff
+--------------------------------------------------------------------------------
+
+pi@raspberrypi:~ $ SoapySDRUtil --info
+######################################################
+##     Soapy SDR -- the SDR abstraction library     ##
+######################################################
+
+Lib Version: v0.8.0-g926c86d9
+API Version: v0.8.0
+ABI Version: v0.8
+Install root: /usr/local
+Search path:  /usr/local/lib/SoapySDR/modules0.8
+Module found: /usr/local/lib/SoapySDR/modules0.8/libHackRFSupport.so   (0.3.3-7d53087)
+Module found: /usr/local/lib/SoapySDR/modules0.8/libLMS7Support.so     (20.10.0-1480bfe)
+Module found: /usr/local/lib/SoapySDR/modules0.8/libPlutoSDRSupport.so (0.2.0-93717b3)
+Module found: /usr/local/lib/SoapySDR/modules0.8/libairspySupport.so   (0.1.2-10d697b)
+Module found: /usr/local/lib/SoapySDR/modules0.8/libairspyhfSupport.so (0.1.1-5488dac)
+Module found: /usr/local/lib/SoapySDR/modules0.8/libremoteSupport.so   (0.6.0-c09b2f1)
+Module found: /usr/local/lib/SoapySDR/modules0.8/librtlsdrSupport.so   (0.3.1-bec4f05)
+Available factories... airspy, airspyhf, hackrf, lime, plutosdr, remote, rtlsdr
+Available converters...
+ -  CF32 -> [CF32, CS16, CS8, CU16, CU8]
+ -  CS16 -> [CF32, CS16, CS8, CU16, CU8]
+ -  CS32 -> [CS32]
+ -   CS8 -> [CF32, CS16, CS8, CU16, CU8]
+ -  CU16 -> [CF32, CS16, CS8]
+ -   CU8 -> [CF32, CS16, CS8]
+ -   F32 -> [F32, S16, S8, U16, U8]
+ -   S16 -> [F32, S16, S8, U16, U8]
+ -   S32 -> [S32]
+ -    S8 -> [F32, S16, S8, U16, U8]
+ -   U16 -> [F32, S16, S8]
+ -    U8 -> [F32, S16, S8]
+
+##################################
+# Now: airspyhf+ attached locally
+##################################
+
+pi@raspberrypi:~ $ SoapySDRUtil --probe
+######################################################
+##     Soapy SDR -- the SDR abstraction library     ##
+######################################################
+
+Probe device 
+
+----------------------------------------------------
+-- Device identification
+----------------------------------------------------
+  driver=AirspyHF
+  hardware=AirspyHF
+  serial=3652eb5dacde39f8
+
+----------------------------------------------------
+-- Peripheral summary
+----------------------------------------------------
+  Channels: 1 Rx, 0 Tx
+  Timestamps: NO
+
+----------------------------------------------------
+-- RX Channel 0
+----------------------------------------------------
+  Full-duplex: NO
+  Supports AGC: YES
+  Stream formats: CF32, CS16, CS8, CU16, CU8
+  Native format: CF32 [full-scale=1]
+  Antennas: RX
+  Full gain range: [0, 54] dB
+    LNA gain range: [0, 6, 6] dB
+    RF gain range: [-48, 0, 6] dB
+  Full freq range: [0.009, 31], [60, 260] MHz
+    RF freq range: [0.009, 31], [60, 260] MHz
+  Sample rates: 0.912, 0.768, 0.456, 0.384, 0.256, 0.192 MSps
+
+###################################
+# Now: airspyhf+ attached remotely
+###################################
+
+user@host:~/code/sdr/SoapyRTLSDR/build$ SoapySDRUtil --probe="driver=remote"
+######################################################
+##     Soapy SDR -- the SDR abstraction library     ##
+######################################################
+
+Probe device driver=remote
+
+----------------------------------------------------
+-- Device identification
+----------------------------------------------------
+  driver=AirspyHF
+  hardware=AirspyHF
+  remote:version=0.6.0-gc09b2f10
+  serial=3652eb5dacde39f8
+
+----------------------------------------------------
+-- Peripheral summary
+----------------------------------------------------
+  Channels: 1 Rx, 0 Tx
+  Timestamps: NO
+
+----------------------------------------------------
+-- RX Channel 0
+----------------------------------------------------
+  Full-duplex: NO
+  Supports AGC: YES
+  Stream formats: CF32, CS16, CS8, CU16, CU8
+  Native format: CF32 [full-scale=1]
+  Stream args:
+     * Remote Format - The stream format used on the remote device.
+       [key=remote:format, default=CF32, type=string, options=(CF32, CS16, CS8, CU16, CU8)]
+     * Remote Scale - The factor used to scale remote samples to full-scale floats.
+       [key=remote:scale, default=1.000000, type=float]
+     * Remote MTU - The maximum datagram transfer size in bytes.
+       [key=remote:mtu, units=bytes, default=1500, type=int]
+     * Remote Window - The size of the kernel socket buffer in bytes.
+       [key=remote:window, units=bytes, default=44040192, type=int]
+     * Remote Priority - Specify the scheduling priority of the server forwarding threads.
+       [key=remote:priority, default=0.500000, type=float, range=[-1, 1]]
+     * Remote Protocol - Specify the transport protocol for the remote stream.
+       [key=remote:prot, default=udp, type=string, options=(udp, tcp, none)]
+  Antennas: RX
+  Full gain range: [0, 54] dB
+    LNA gain range: [0, 6, 6] dB
+    RF gain range: [-48, 0, 6] dB
+  Full freq range: [0.009, 31], [60, 260] MHz
+    RF freq range: [0.009, 31], [60, 260] MHz
+  Sample rates: 0.912, 0.768, 0.456, 0.384, 0.256, 0.192 MSps
+
+--------------------------------------------------------------------------------
+SoapyRemote stuff
+--------------------------------------------------------------------------------
+
+Ref: https://0xfeed.tech/2017/04/remote-access-tools-for-sdr-receivers/
+
+Start SoapyRemote server:
+        
+# Bind to all interfaces in default port 55132
+SoapySDRServer --bind
+
+# Bind to a specific IP address and port
+SoapySDRServer --bind="0.0.0.0:1234"
+
+Configuring SoapyRemote client applications
+
+SoapyRemote access is supported by many SDR applications, such as Gqrx,
+CubicSDR and the rx_tools command-line tools. Additionally, there is support
+for Pothosware data processing framework, and for GNU Radio through the
+GrOsmoSDR component.
+
+Client applications using SoapySDR and SoapyRemote are usually configured using
+a device string that provides configuration parameters to use a remote driver
+and to locate the SoapyRemote server:
+
+driver=remote,remote=tcp://192.168.0.111:55132
+
+NOTE: To use SoapyRemote over TCP port forwarding, like with SSH, you need to
+get the latest code from master branch and use device parameter
+remote:prot=tcp, because SoapyRemote defaults to using UDP packets.
+
+See the SoapyRemote wiki for full documentation of all configuration parameters.
+
+Configuring Gqrx:
+
+    Gqrx must be built with support for GrOsmoSDR
+
+    Use device string: 
+
+        soapy=0,driver=remote,remote=tcp://192.168.0.111:55132 
+
+    where 192.168.0.111:55132 is the IP address and port of your SoapyRemote 
+    server
+
+--------------------------------------------------------------------------------
+More SoapyRemote stuff
+--------------------------------------------------------------------------------
+Ref: https://github.com/pothosware/SoapyRemote/wiki
+
+Running the server
+
+Launching the server directly
+
+Run the server on the remote machine (the machine with the SDR hardware):
+
+SoapySDRServer --bind
+
+Or specify a custom bind address and port:
+
+SoapySDRServer --bind="0.0.0.0:1234"
+
+IPv6 address URLs are also supported:
+
+SoapySDRServer --bind="[::]:1234"
+
+Using the systemd service (linux)
+
+Start the server in the background:
+
+sudo systemctl start SoapySDRServer
+
+#is it running?
+journalctl -u SoapySDRServer
+
+Start the server automatically on startup:
+
+sudo systemctl enable SoapySDRServer
+
+--------------------------------------------------------------------------------
+My final SoapyRemote systemd stuff
+--------------------------------------------------------------------------------
+
+Ref: https://ma.ttias.be/auto-restart-crashed-service-systemd/
+Ref: https://github.com/pothosware/SoapyRemote/blob/master/system/SoapySDRServer.service.in#L7
+
+$ cat | sudo tee /etc/systemd/system/SoapySDRServer.service
+[Unit]
+Description=SoapySDRServer Daemon
+After=network-online.target
+Wants=network-online.target systemd-networkd-wait-online.service
+StartLimitIntervalSec=500
+StartLimitBurst=5
+
+[Service]
+ExecStart=/usr/local/bin/SoapySDRServer --bind
+Restart=on-failure
+KillMode=process
+RestartSec=5s
+LimitRTPRIO=99
+
+[Install]
+WantedBy=multi-user.target
+
+<ENTER>
+<CTRL-D>
+
+sudo systemctl start SoapySDRServer
+
+journalctl -u SoapySDRServer
+
+sudo systemctl enable SoapySDRServer
+
+--------------------------------------------------------------------------------
+My SoapySDRUtil outputs
+--------------------------------------------------------------------------------
+user@host:~/code/sdr/SoapyAudio/build$ SoapySDRUtil --find
+######################################################
+##     Soapy SDR -- the SDR abstraction library     ##
+######################################################
+
+Found device 0
+  default_input = True
+  default_output = True
+  device_id = 0
+  driver = audio
+  label = hw:HDA Intel PCH,0
+
+Found device 1
+  default_input = False
+  default_output = False
+  device_id = 13
+  driver = audio
+  label = default
+
+Found device 2
+  driver = remote
+  label = AirSpy HF+ [3652eb5dacde39f8]
+  remote = tcp://192.168.1.21:55132
+  remote:driver = airspyhf
+  serial = 3652eb5dacde39f8
+
+user@host:~/code/sdr/SoapyAudio/build$ SoapySDRUtil --find="driver=remote,remote=192.168.1.21,remote:driver=airspyhf"
+######################################################
+##     Soapy SDR -- the SDR abstraction library     ##
+######################################################
+
+Found device 0
+  driver = remote
+  label = AirSpy HF+ [3652eb5dacde39f8]
+  remote = tcp://192.168.1.21:55132
+  remote:driver = airspyhf
+  serial = 3652eb5dacde39f8
+
+
+Suggests that for gqrx:
+
+    soapy=0,driver=remote,remote=192.168.1.21,remote:driver=airspyhf
+
+BUT just let gqrx find the Airspy and select it from the menu and
+it gives:
+
+    driver=remote,remote=tcp://192.168.1.21:55132,remote:driver=airspyhf,serial=3652eb5dacde39f8,soapy=2
+
+Presumbly 'soapy=2'is the big difference...
+
